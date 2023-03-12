@@ -128,3 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /docs/Savotikov_bakalavr.docx
+/werehouse/News_Category_Dataset_v3.json
+/werehouse/papers.csv
