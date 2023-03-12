@@ -73,8 +73,6 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 @app.on_event("startup")
 async def startup():
-    """действия при запуске АПИ"""
-
     """инициализация кеша"""
     FastAPICache.init(InMemoryBackend(), prefix="fastapi-cache")
 
