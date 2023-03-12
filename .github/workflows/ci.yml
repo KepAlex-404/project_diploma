@@ -1,0 +1,20 @@
+on:
+  push:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.ref_type == 'branch'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Setup Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    - name: Run tests
+      run: pytest
+    - name: Notify on failure
+      if: failure()
+      run: echo "Tests failed."
