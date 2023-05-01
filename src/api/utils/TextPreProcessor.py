@@ -1,7 +1,11 @@
 from typing import List
 
+import nltk
 from nltk import word_tokenize, SnowballStemmer, pos_tag
 from nltk.corpus import stopwords
+
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
 
 
 class TextPreProcessor:
