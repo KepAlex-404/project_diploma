@@ -1,18 +1,11 @@
 # -*- coding: utf-8 -*-
-
-import asyncio
-
-import pydantic
-from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.inmemory import InMemoryBackend
 from starlette import status
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-from src.api.routers import trainer, analyser
 
+from src.api.routers import trainer, analyser
 
 app = FastAPI(redoc_url=None)
 
@@ -48,27 +41,6 @@ class BackgroundRunner:
 
 
 runner = BackgroundRunner()
-
-
-@app.exception_handler(pydantic.error_wrappers.ValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": exc.errors(), "message": 'Unprocessable Entity'}),
-    )
-
-
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """
-    обрабатывает ошибки неправильно формата входящих на апи данных
-    возвращает где и что было неправильно
-    """
-
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": exc.errors(), "body": exc.body}),
-    )
 
 
 @app.on_event("startup")

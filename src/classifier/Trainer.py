@@ -1,87 +1,75 @@
 # Importing modules
-import pyLDAvis.gensim_models as gensimvis
-import pickle
-import pyLDAvis
-import gensim.corpora as corpora
-from pprint import pprint
+
+import os
 
 import gensim
-from gensim.utils import simple_preprocess
-import nltk
-import pandas as pd
-import os
-from nltk.corpus import stopwords
+import gensim.corpora as corpora
+import pyLDAvis
+import pyLDAvis.gensim_models as gensimvis
+from gensim.models import CoherenceModel
 
-nltk.download('stopwords')
-
-os.chdir('../../')
-
-print(os.getcwd())
-
-# Read data into papers
-papers = pd.read_json('warehouse/News_category_Dataset_v3.json', lines=True)
-
-stop_words = stopwords.words('english')
-stop_words.extend(['from', 'subject', 're', 'edu', 'use'])
+from src.api.utils.TextPreProcessor import TextPreProcessor
 
 
-def sent_to_words(sentences):
-    for sentence in sentences:
-        # deacc=True removes punctuations
-        yield gensim.utils.simple_preprocess(str(sentence), deacc=True)
+class Trainer:
+    """
+    Gives functionality to train new LDA models
+    """
+    corpus = None
+    id2word = None
+    num_topics = None
+    lda_model = None
 
+    def __init__(self, stop_words=None, tags=None, num_topics=10):
+        self.pre_processor = TextPreProcessor(stop_words, tags)
+        self.num_topics = num_topics
 
-def remove_stopwords(texts):
-    return [[word for word in simple_preprocess(str(doc))
-             if word not in stop_words] for doc in texts]
+    @staticmethod
+    def make_trigrams(data_words):
+        # Build the bigram and trigram models
+        bigram = gensim.models.Phrases(data_words, min_count=5, threshold=100)  # higher threshold fewer phrases.
+        trigram = gensim.models.Phrases(bigram[data_words], threshold=100)
+        # Faster way to get a sentence clubbed as a trigram/bigram
+        bigram_mod = gensim.models.phrases.Phraser(bigram)
+        trigram_mod = gensim.models.phrases.Phraser(trigram)
 
+        def make_trigrams(texts):
+            return [trigram_mod[bigram_mod[doc]] for doc in texts]
 
-data = papers.headline.tolist()
-data_words = list(sent_to_words(data))
+        # Form Bigrams
+        data_words_trigrams = make_trigrams(data_words)
+        return data_words_trigrams
 
-# remove stop words
-data_words = remove_stopwords(data_words)
+    def save_model(self, model_id):
+        ld_avis_data_filepath = os.path.join('warehouse/ldavis_prepared_' + str(model_id))
+        # сохранение LdaModel
+        self.lda_model.save(ld_avis_data_filepath+'_model')
+        # сохранение Dictionary
+        self.id2word.save(ld_avis_data_filepath+'_dictionary')
 
-print(data_words[:1][0][:30])
-#
-#
-# Create Dictionary
-id2word = corpora.Dictionary(data_words)
+        lda_prepared = gensimvis.prepare(self.lda_model, self.corpus, self.id2word)
+        pyLDAvis.save_html(lda_prepared, ld_avis_data_filepath+'.html')
 
-# Create Corpus
-texts = data_words
+    def build_model(self, model_id: str):
+        # Build LDA model
+        self.lda_model = gensim.models.LdaModel(corpus=self.corpus,
+                                                id2word=self.id2word,
+                                                num_topics=self.num_topics,
+                                                random_state=100,
+                                                update_every=1,
+                                                chunksize=100,
+                                                passes=10,
+                                                alpha='auto',
+                                                per_word_topics=True
+                                                )
 
-# Term Document Frequency
-corpus = [id2word.doc2bow(text) for text in texts]
+        self.save_model(model_id)
 
-# View
-print(corpus[:1][0][:30])
+    def process(self, data, model_id):
+        data_words = self.pre_processor.process(data)
+        data_words_trigrams = self.make_trigrams(data_words)
+        self.id2word = corpora.Dictionary(data_words_trigrams)
+        # Term Document Frequency
+        self.corpus = [self.id2word.doc2bow(text) for text in data_words_trigrams]
 
-# number of topics
-num_topics = 15
-
-# Build LDA model
-lda_model = gensim.models.LdaModel(corpus=corpus,
-                                   id2word=id2word,
-                                   num_topics=num_topics
-                                   )
-#
-# Print the Keyword in the 10 topics
-pprint(lda_model.print_topics())
-doc_lda = lda_model[corpus]
-
-LDAvis_data_filepath = os.path.join('ldavis_prepared_' + str(num_topics))
-
-# # this is a bit time consuming - make the if statement True
-# # if you want to execute visualization prep yourself
-if 1 == 1:
-    LDAvis_prepared = gensimvis.prepare(lda_model, corpus, id2word)
-    with open(LDAvis_data_filepath, 'wb') as f:
-        pickle.dump(LDAvis_prepared, f)
-
-# load the pre-prepared pyLDAvis data from disk
-with open(LDAvis_data_filepath, 'rb') as f:
-    LDAvis_prepared = pickle.load(f)
-
-pyLDAvis.save_html(LDAvis_prepared, 'ldavis_prepared_' + str(num_topics) + '.html')
-#
+        self.build_model(model_id)

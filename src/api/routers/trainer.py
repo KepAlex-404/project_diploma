@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-from fastapi import APIRouter
+import uuid
+
+import pandas as pd
+from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Depends
+
+from src.api.utils.DataBodies import Meta
+from src.classifier.Trainer import Trainer
 
 router = APIRouter(
     prefix="/trainer",
@@ -8,6 +14,13 @@ router = APIRouter(
 )
 
 
-@router.post('/all_projects')
-def train_model():
-    return 200
+@router.post('/train_model/')
+async def train_model(background_tasks: BackgroundTasks, file: UploadFile = File(...), meta: Meta = Depends()):
+    # todo chose column
+    df = pd.read_csv(file.file, delimiter=meta.delimiter)
+    data = df[meta.column].tolist()
+    random_id = uuid.uuid4()
+    trainer = Trainer(num_topics=meta.topics_num)
+    background_tasks.add_task(trainer.process, data, random_id)
+    # return id on which we can call for a model
+    return random_id
