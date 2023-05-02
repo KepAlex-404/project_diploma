@@ -70,3 +70,4 @@ wasabi==1.1.1
 fastapi_cache
 python-jose[cryptography]
 bcrypt
+passlib
