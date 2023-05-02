@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Security
 from fastapi.responses import FileResponse
 
+from src.api.routers.Dependency import get_current_active_user
 from src.api.utils.DataBodies import AnalyserBody
 from src.classifier.Analyser import Analyser
 
 router = APIRouter(
     prefix="/analyser",
     responses={404: {"description": "Not found"}},
+    dependencies=[Security(get_current_active_user, scopes=["User"])]
 )
 
 

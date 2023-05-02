@@ -3,14 +3,16 @@
 import uuid
 
 import pandas as pd
-from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Depends
+from fastapi import APIRouter, BackgroundTasks, UploadFile, File, Depends, Security
 
+from src.api.routers.Dependency import get_current_active_user
 from src.api.utils.DataBodies import Meta
 from src.classifier.Trainer import Trainer
 
 router = APIRouter(
     prefix="/trainer",
     responses={404: {"description": "Not found"}},
+    dependencies=[Security(get_current_active_user, scopes=["User"])]
 )
 
 
