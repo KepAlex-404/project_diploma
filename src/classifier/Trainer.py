@@ -1,5 +1,3 @@
-# Importing modules
-
 import os
 
 import gensim
@@ -33,18 +31,18 @@ class Trainer:
         bigram_mod = gensim.models.phrases.Phraser(bigram)
         trigram_mod = gensim.models.phrases.Phraser(trigram)
 
-        def make_trigrams(texts):
+        def trigrams(texts):
             return [trigram_mod[bigram_mod[doc]] for doc in texts]
 
         # Form Bigrams
-        data_words_trigrams = make_trigrams(data_words)
+        data_words_trigrams = trigrams(data_words)
         return data_words_trigrams
 
     def save_model(self, model_id):
         ld_avis_data_filepath = os.path.join('warehouse/ldavis_prepared_' + str(model_id))
-        # сохранение LdaModel
+        # save LdaModel
         self.lda_model.save(ld_avis_data_filepath+'_model')
-        # сохранение Dictionary
+        # save Dictionary
         self.id2word.save(ld_avis_data_filepath+'_dictionary')
 
         lda_prepared = gensimvis.prepare(self.lda_model, self.corpus, self.id2word)

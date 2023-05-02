@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 import nltk
 from nltk import word_tokenize, SnowballStemmer, pos_tag
@@ -21,7 +21,10 @@ class TextPreProcessor:
         if stop_words is not None:
             self.stop_words.extend(stop_words)
 
-    def process(self, texts) -> List[str]:
+    def process(self, texts: Union[List[str], str]) -> list[list]:
+        if type(texts) is str:
+            texts = [texts]
+
         stemmer = SnowballStemmer('english')
         result = []
         for doc in texts:

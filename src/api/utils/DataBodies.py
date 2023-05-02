@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, conint
 
@@ -19,3 +19,9 @@ class Meta(BaseModel):
     delimiter: str = ","
     column: Optional[str] = 'text'
     topics_num: conint(ge=5, le=20) = 10
+    stop_words: Optional[List[str]]
+
+
+class AnalyserBody(BaseModel):
+    model_id: str
+    text: Optional[str]
