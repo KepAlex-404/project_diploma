@@ -2,6 +2,7 @@ from typing import List, Union
 
 import nltk
 from nltk import word_tokenize, SnowballStemmer, pos_tag
+from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 
 nltk.download('stopwords')
@@ -13,6 +14,7 @@ class TextPreProcessor:
     tags = []
 
     def __init__(self, stop_words=None, tags=None):
+        self.lemmatizer = WordNetLemmatizer()
         if tags is None:
             self.tags = ['NN', 'JJ']
         else:
@@ -38,9 +40,10 @@ class TextPreProcessor:
             # Оставляем только существительные и прилагательные
             filtered_words = [word for word, tag in tagged_words if tag in self.tags]
             # Удаление стоп-слов
-            filtered_words = [word for word in filtered_words if
+            filtered_sw_words = [word for word in filtered_words if
                               word not in self.stop_words and word.isalpha and len(word) > 3]
+            lemmatized_tokens = [self.lemmatizer.lemmatize(token) for token in filtered_sw_words]
             # Применение стеммера
-            filtered_words = [stemmer.stem(word) for word in filtered_words]
-            result.append(filtered_words)
+            stemmed_words = [stemmer.stem(word) for word in lemmatized_tokens]
+            result.append(stemmed_words)
         return result
