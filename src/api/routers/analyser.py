@@ -24,7 +24,7 @@ def get_topic_for_text(body: AnalyserBody):
 @router.post('/lda_visualization')
 def get_visualization(body: AnalyserBody):
     analyser = Analyser(body.model_id)
-    file_path = analyser.get_visualization_path()
-    return FileResponse(file_path, filename="index.html", media_type="text/html")
+    model = analyser.get_model()
+    return model
 
 

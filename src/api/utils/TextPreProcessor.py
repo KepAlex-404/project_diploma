@@ -7,7 +7,7 @@ from nltk.corpus import stopwords
 
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
-
+nltk.download('wordnet')
 
 class TextPreProcessor:
     stop_words = stopwords.words('english')
@@ -40,10 +40,11 @@ class TextPreProcessor:
             # Оставляем только существительные и прилагательные
             filtered_words = [word for word, tag in tagged_words if tag in self.tags]
             # Удаление стоп-слов
-            filtered_sw_words = [word for word in filtered_words if
-                              word not in self.stop_words and word.isalpha and len(word) > 3]
-            lemmatized_tokens = [self.lemmatizer.lemmatize(token) for token in filtered_sw_words]
+            lemmatized_tokens = [self.lemmatizer.lemmatize(token) for token in filtered_words]
             # Применение стеммера
             stemmed_words = [stemmer.stem(word) for word in lemmatized_tokens]
-            result.append(stemmed_words)
+            filtered_sw_words = [word for word in stemmed_words if
+                              word not in self.stop_words and word.isalpha and len(word) > 3]
+
+            result.append(filtered_sw_words)
         return result

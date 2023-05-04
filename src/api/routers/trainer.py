@@ -22,7 +22,7 @@ async def train_model(background_tasks: BackgroundTasks, file: UploadFile = File
     df = pd.read_csv(file.file, delimiter=meta.delimiter)
     data = df[meta.column].tolist()
     random_id = uuid.uuid4()
-    trainer = Trainer(num_topics=meta.topics_num)
+    trainer = Trainer(num_topics=meta.topics_num, stop_words=meta.stop_words)
     background_tasks.add_task(trainer.process, data, random_id)
     # return id on which we can call for a model
     return random_id
