@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from fastapi import APIRouter, Security
-from fastapi.responses import FileResponse
 
 from src.api.routers.Dependency import get_current_active_user
 from src.api.utils.DataBodies import AnalyserBody

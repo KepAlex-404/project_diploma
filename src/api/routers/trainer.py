@@ -17,7 +17,9 @@ router = APIRouter(
 
 
 @router.post('/train_model/')
-async def train_model(background_tasks: BackgroundTasks, file: UploadFile = File(...), meta: Meta = Depends()):
+async def train_model(background_tasks: BackgroundTasks,
+                      file: UploadFile = File(...),
+                      meta: Meta = Depends()):
     # todo chose column
     df = pd.read_csv(file.file, delimiter=meta.delimiter)
     data = df[meta.column].tolist()

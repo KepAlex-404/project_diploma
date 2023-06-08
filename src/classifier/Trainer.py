@@ -71,3 +71,6 @@ class Trainer:
         self.corpus = [self.id2word.doc2bow(text) for text in data_words_trigrams]
 
         self.build_model(model_id)
+
+
+

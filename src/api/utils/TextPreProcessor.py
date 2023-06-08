@@ -9,6 +9,7 @@ nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 
+
 class TextPreProcessor:
     stop_words = stopwords.words('english')
     tags = []
@@ -44,7 +45,8 @@ class TextPreProcessor:
             # Применение стеммера
             stemmed_words = [stemmer.stem(word) for word in lemmatized_tokens]
             filtered_sw_words = [word for word in stemmed_words if
-                              word not in self.stop_words and word.isalpha and len(word) > 3]
+                                 word not in self.stop_words and word.isalpha and len(word) > 3]
 
             result.append(filtered_sw_words)
         return result
+
